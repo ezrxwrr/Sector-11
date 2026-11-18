@@ -236,6 +236,13 @@ public class PlayerShooter : MonoBehaviour
     {
         scopeAccuracyMultiplier = Mathf.Max(0.25f, newMultiplier);
     }
+    
+    public void AddAmmo(int amount)
+    {
+        if (amount <= 0) return;
+        reserveAmmo += amount;
+        Health.SetHitFeedback($"AMMO RESUPPLIED (+{amount} RDS)");
+    }
 
     private Vector3 GetAimDirection(Vector3 origin)
     {

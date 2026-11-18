@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\_Project\Scripts\ExtractionZone.cs" />
+    <Compile Include="Assets\_Project\Scripts\AmmoCrate.cs" />
     <Compile Include="Assets\_Project\Scripts\ZoneEnemyAI.cs" />
     <Compile Include="Assets\_Project\Scripts\WeaponAimAligner.cs" />
     <Compile Include="Assets\_Project\Scripts\PlayerShooter.cs" />
