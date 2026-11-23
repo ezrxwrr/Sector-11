@@ -4,36 +4,41 @@ using UnityEngine;
 public class ZoneEnemyAI : MonoBehaviour
 {
     [Header("Zone Patrol Settings")]
-    [Tooltip("Radius area patroli di sekitar titik awal musuh ditempatkan.")]
-    [SerializeField] private float zoneRadius = 5f;
+    [SerializeField] private float zoneRadius = 5.5f;
     [SerializeField] private float patrolSpeed = 2.4f;
-    [SerializeField] private float combatStrafeSpeed = 1.8f;
-    [SerializeField] private float waitTimeAtPoint = 1.2f;
+    [SerializeField] private float combatStrafeSpeed = 2.6f;
+    [SerializeField] private float waitTimeAtPoint = 1.0f;
     [SerializeField] private float obstacleCheckRadius = 0.45f;
 
-    [Header("Detection & Combat")]
-    [SerializeField] private float aggroRange = 14f;
-    [SerializeField] private float rotationSpeed = 10f;
-    [SerializeField] private float fireInterval = 1.15f;
-    [SerializeField] private float baseDamage = 18f;
-    [SerializeField] private float eyeHeight = 0.5f;
+    [Header("Detection & Tactical Burst Combat")]
+    [SerializeField] private float aggroRange = 15f;
+    [SerializeField] private float rotationSpeed = 11f;
+    [SerializeField] private int burstCount = 3;
+    [SerializeField] private float timeBetweenBurstShots = 0.16f;
+    [SerializeField] private float burstCooldown = 1.4f;
+    [SerializeField] private float baseDamage = 15f;
+    [SerializeField] private float eyeHeight = 0.45f;
 
     [Header("Enemy Hit Chance Weights (%)")]
-    [SerializeField] private float missWeight = 35f;
+    [SerializeField] private float missWeight = 38f;
     [SerializeField] private float headWeight = 2f;
-    [SerializeField] private float torsoWeight = 38f;
+    [SerializeField] private float torsoWeight = 35f;
     [SerializeField] private float armsWeight = 12.5f;
     [SerializeField] private float legsWeight = 12.5f;
 
     [Header("Tracer Visual")]
     [SerializeField] private bool showBulletTracer = true;
-    [SerializeField] private float tracerDuration = 0.05f;
+    [SerializeField] private float tracerDuration = 0.045f;
     [SerializeField] private Color tracerColor = new Color(1f, 0.25f, 0.2f, 1f);
 
     private Vector3 homePosition;
     private Vector3 currentDestination;
     private float waitTimer;
-    private float nextFireTime;
+    private float nextBurstTime;
+    private bool isFiringBurst;
+    private float lastKnownHealth;
+    private float alertTimer;
+
     private Transform playerTransform;
     private Health playerHealth;
     private Health myHealth;
@@ -48,6 +53,7 @@ public class ZoneEnemyAI : MonoBehaviour
     private void Start()
     {
         homePosition = transform.position;
+        if (myHealth != null) lastKnownHealth = myHealth.CurrentHealth;
         FindPlayer();
         PickNewZonePoint();
     }
@@ -87,10 +93,21 @@ public class ZoneEnemyAI : MonoBehaviour
     {
         if (myHealth != null && myHealth.IsDead) return;
 
-        if (playerTransform == null)
+        if (alertTimer > 0f)
         {
-            FindPlayer();
+            alertTimer -= Time.deltaTime;
         }
+
+        // Evasive reaction when taking damage
+        if (myHealth != null && myHealth.CurrentHealth < lastKnownHealth)
+        {
+            lastKnownHealth = myHealth.CurrentHealth;
+            waitTimer = 0f;
+            alertTimer = 4f;
+            PickNewZonePoint();
+        }
+
+        if (playerTransform == null) FindPlayer();
 
         bool canSeePlayer = CheckPlayerInSight();
 
@@ -108,19 +125,17 @@ public class ZoneEnemyAI : MonoBehaviour
     {
         if (playerTransform == null) return false;
 
+        float effectiveRange = alertTimer > 0f ? aggroRange * 1.35f : aggroRange;
         Vector3 myEye = transform.position + Vector3.up * eyeHeight;
         Vector3 playerChest = playerTransform.position + Vector3.up * 1.1f;
         Vector3 toPlayer = playerChest - myEye;
         float distance = toPlayer.magnitude;
 
-        if (distance > aggroRange) return false;
+        if (distance > effectiveRange) return false;
 
         if (Physics.Raycast(myEye, toPlayer.normalized, out RaycastHit hit, distance, ~0, QueryTriggerInteraction.Ignore))
         {
-            if (hit.transform.root != playerTransform.root)
-            {
-                return false; // Pandangan terhalang Cover / mobil
-            }
+            if (hit.transform.root != playerTransform.root) return false;
         }
 
         return true;
@@ -149,11 +164,27 @@ public class ZoneEnemyAI : MonoBehaviour
 
         MoveTowardDestination(combatStrafeSpeed, faceMoveDirection: false);
 
-        if (Time.time >= nextFireTime)
+        if (!isFiringBurst && Time.time >= nextBurstTime)
         {
-            nextFireTime = Time.time + fireInterval;
-            ShootAtPlayer();
+            StartCoroutine(FireBurstCoroutine());
         }
+    }
+
+    private IEnumerator FireBurstCoroutine()
+    {
+        isFiringBurst = true;
+
+        for (int i = 0; i < burstCount; i++)
+        {
+            if (myHealth != null && myHealth.IsDead) break;
+            if (!CheckPlayerInSight()) break;
+
+            ShootAtPlayer();
+            yield return new WaitForSeconds(timeBetweenBurstShots);
+        }
+
+        nextBurstTime = Time.time + burstCooldown + Random.Range(-0.2f, 0.35f);
+        isFiringBurst = false;
     }
 
     private void MoveTowardDestination(float speed, bool faceMoveDirection)
@@ -263,10 +294,8 @@ public class ZoneEnemyAI : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Vector3 center = Application.isPlaying ? homePosition : transform.position;
-
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(center, zoneRadius);
-
         Gizmos.color = new Color(1f, 0.2f, 0.2f, 0.5f);
         Gizmos.DrawWireSphere(transform.position, aggroRange);
     }

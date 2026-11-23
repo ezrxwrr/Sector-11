@@ -8,7 +8,8 @@ public class ExtractionZone : MonoBehaviour
     [Header("Extraction Settings")]
     [SerializeField] private float extractionDuration = 5f;
     [SerializeField] private string playerTag = "Player";
-    [SerializeField] private bool reloadSceneOnExtract = true;
+    [SerializeField] private string baseSceneName = "_Base";
+    [SerializeField] private bool returnToBaseOnExtract = true;
 
     [Header("Prototype HUD")]
     [SerializeField] private bool showExtractionHUD = true;
@@ -35,12 +36,13 @@ public class ExtractionZone : MonoBehaviour
         if (timer >= extractionDuration)
         {
             extracted = true;
-            Debug.Log("[ExtractionZone] EXTRACTION SUCCESS!");
+            GameInventory.EnsureExists().SecureRaidLootToStash();
+            Debug.Log("[ExtractionZone] EXTRACTION SUCCESS! Loot moved to Base stash.");
             onExtractionComplete?.Invoke();
 
-            if (reloadSceneOnExtract)
+            if (returnToBaseOnExtract)
             {
-                Invoke(nameof(ReloadScene), 2f);
+                Invoke(nameof(ReturnToBase), 2f);
             }
         }
     }
@@ -65,9 +67,16 @@ public class ExtractionZone : MonoBehaviour
         }
     }
 
-    private void ReloadScene()
+    private void ReturnToBase()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        if (Application.CanStreamedLevelBeLoaded(baseSceneName))
+        {
+            SceneManager.LoadScene(baseSceneName);
+        }
+        else
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
 
     private void OnGUI()
@@ -81,14 +90,14 @@ public class ExtractionZone : MonoBehaviour
             alignment = TextAnchor.MiddleCenter
         };
 
-        float width = 340f;
+        float width = 380f;
         float height = 48f;
         float x = (Screen.width - width) * 0.5f;
         float y = 40f;
 
         if (extracted)
         {
-            GUI.Box(new Rect(x, y, width, height), "EXTRACTION SUCCESS!", style);
+            GUI.Box(new Rect(x, y, width, height), "EXTRACTION SUCCESS! RETURNING TO BASE", style);
         }
         else
         {

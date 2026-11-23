@@ -56,10 +56,15 @@
     <Compile Include="Assets\_Project\Scripts\PlayerShooter.cs" />
     <Compile Include="Assets\_Project\Scripts\ArmPoseOffset.cs" />
     <Compile Include="Assets\_Project\Scripts\CameraFollow.cs" />
+    <Compile Include="Assets\_Project\Scripts\RaidDeployTerminal.cs" />
     <Compile Include="Assets\_Project\Scripts\PlayerController.cs" />
+    <Compile Include="Assets\_Project\Scripts\WaterFiltrationSpot.cs" />
+    <Compile Include="Assets\_Project\Scripts\InventoryHUD.cs" />
     <Compile Include="Assets\_Project\Scripts\Health.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\_Project\Scripts\VisionCone.cs" />
+    <Compile Include="Assets\_Project\Scripts\LootPickup.cs" />
+    <Compile Include="Assets\_Project\Scripts\GameInventory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\ThirdParty\fbx\environment\LICENSE.txt" />

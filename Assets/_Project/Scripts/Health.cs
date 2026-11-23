@@ -22,15 +22,12 @@ public class Health : MonoBehaviour
     [Header("Helmet (Data Only - No 3D Model Yet)")]
     [SerializeField] private bool hasHelmet = false;
     [Range(0f, 1f)]
-    [Tooltip("Peluang selamat saat terkena Headshot jika memakai Helmet (0.45 = 45% selamat).")]
     [SerializeField] private float helmetSaveChance = 0.45f;
-    [Tooltip("Sisa damage yang masuk jika Helmet berhasil menahan Headshot.")]
     [SerializeField] private float helmetBluntDamage = 35f;
 
     [Header("Body Armor (Data Only - No 3D Model Yet)")]
     [SerializeField] private bool hasBodyArmor = false;
     [Range(0f, 0.9f)]
-    [Tooltip("Persentase pengurangan damage pada Torso (0.4 = mengurangi 40% damage).")]
     [SerializeField] private float bodyArmorReduction = 0.40f;
 
     [Header("Limb Multipliers")]
@@ -47,7 +44,6 @@ public class Health : MonoBehaviour
     private float currentHealth;
     private bool isDead;
 
-    // Feedback sementara di layar untuk verifikasi RNG & armor saat testing
     private static string globalLastHitText = "";
     private static float globalLastHitExpireTime = 0f;
 
@@ -67,7 +63,6 @@ public class Health : MonoBehaviour
         onHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
-    // Dipanggil oleh PlayerShooter / EnemyShooter dengan lokasi bagian tubuh
     public void ReceiveBulletHit(float baseDamage, HitZone zone)
     {
         if (isDead || zone == HitZone.Miss) return;
@@ -85,7 +80,7 @@ public class Health : MonoBehaviour
                 }
                 else
                 {
-                    finalDamage = maxHealth * 10f; // Instant kill
+                    finalDamage = maxHealth * 10f;
                     feedback = "HEADSHOT! (INSTANT KILL)";
                 }
                 break;
@@ -118,7 +113,6 @@ public class Health : MonoBehaviour
         TakeDamage(finalDamage);
     }
 
-    // Tetap tersedia untuk damage umum (ledakan, jatuh, melee)
     public void TakeDamage(float amount)
     {
         if (isDead || amount <= 0f) return;
@@ -140,7 +134,6 @@ public class Health : MonoBehaviour
         onHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
-    // Method siap pakai untuk sistem loot/equipment nanti
     public void EquipHelmet(bool equipped, float saveChance = 0.45f)
     {
         hasHelmet = equipped;
@@ -169,7 +162,8 @@ public class Health : MonoBehaviour
 
         if (isPlayer)
         {
-            Invoke(nameof(ReloadCurrentScene), 1.5f);
+            GameInventory.EnsureExists().LoseRaidLootOnDeath();
+            Invoke(nameof(ReturnToBaseAfterDeath), 1.5f);
             return;
         }
 
@@ -179,9 +173,16 @@ public class Health : MonoBehaviour
         }
     }
 
-    private void ReloadCurrentScene()
+    private void ReturnToBaseAfterDeath()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        if (Application.CanStreamedLevelBeLoaded("_Base"))
+        {
+            SceneManager.LoadScene("_Base");
+        }
+        else
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
 
     private void OnGUI()
@@ -197,7 +198,7 @@ public class Health : MonoBehaviour
                 alignment = TextAnchor.MiddleLeft
             };
 
-            string status = isDead ? "KIA (DEAD)" : $"HP: {Mathf.CeilToInt(currentHealth)} / {Mathf.CeilToInt(maxHealth)}";
+            string status = isDead ? "KIA — LOOT LOST" : $"HP: {Mathf.CeilToInt(currentHealth)} / {Mathf.CeilToInt(maxHealth)}";
             GUI.Box(new Rect(20, 20, 220, 36), "  " + status, hpStyle);
         }
 
