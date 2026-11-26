@@ -153,7 +153,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ExtractionZone
   extractionDuration: 5
   playerTag: Player
-  reloadSceneOnExtract: 1
+  baseSceneName: _Base
+  returnToBaseOnExtract: 1
   showExtractionHUD: 1
   onExtractionComplete:
     m_PersistentCalls:
@@ -404,7 +405,9 @@ MonoBehaviour:
   obstacleCheckRadius: 0.45
   aggroRange: 14
   rotationSpeed: 10
-  fireInterval: 1.15
+  burstCount: 3
+  timeBetweenBurstShots: 0.16
+  burstCooldown: 1.4
   baseDamage: 18
   eyeHeight: 0.45
   missWeight: 35
@@ -2238,6 +2241,7 @@ GameObject:
   - component: {fileID: 1462091017}
   - component: {fileID: 1462091018}
   - component: {fileID: 1462091019}
+  - component: {fileID: 1462091020}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -2374,6 +2378,35 @@ MonoBehaviour:
   onDeath:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1462091020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1462091014}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 194015e984adaf548889dc5d0a5e0f86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryUI
+  isInBase: 1
+  entries:
+  - type: 0
+    displayName: Activated Charcoal
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+    required: 1
+  - type: 1
+    displayName: Micro-Filter Cloth
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.3, g: 0.55, b: 0.7, a: 1}
+    required: 1
+  - type: 2
+    displayName: PVC Water Pipe
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.75, g: 0.75, b: 0.8, a: 1}
+    required: 1
 --- !u!1001 &1689366222
 PrefabInstance:
   m_ObjectHideFlags: 0

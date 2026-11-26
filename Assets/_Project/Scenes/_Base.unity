@@ -1166,6 +1166,7 @@ GameObject:
   - component: {fileID: 1118385773}
   - component: {fileID: 1118385772}
   - component: {fileID: 1118385771}
+  - component: {fileID: 1118385776}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1197,7 +1198,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1118385769}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b1d43174def7ebd4e85d04b55a4d5101, type: 3}
   m_Name: 
@@ -1315,6 +1316,35 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &1118385776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1118385769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 194015e984adaf548889dc5d0a5e0f86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryUI
+  isInBase: 1
+  entries:
+  - type: 0
+    displayName: Activated Charcoal
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+    required: 1
+  - type: 1
+    displayName: Micro-Filter Cloth
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.3, g: 0.55, b: 0.7, a: 1}
+    required: 1
+  - type: 2
+    displayName: PVC Water Pipe
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.75, g: 0.75, b: 0.8, a: 1}
+    required: 1
 --- !u!1 &1188931261
 GameObject:
   m_ObjectHideFlags: 0
