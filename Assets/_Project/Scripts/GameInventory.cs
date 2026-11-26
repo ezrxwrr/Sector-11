@@ -7,6 +7,7 @@ public enum MaterialType
     Charcoal,
     FilterCloth,
     WaterPipe,
+<<<<<<< HEAD
     Wiring,
     Compressor,
     EngineParts,
@@ -47,6 +48,9 @@ public static class ItemInfo
     }
 
     public static int GetBuyPrice(MaterialType t) => GetSellPrice(t) * 2;
+=======
+    Lamp
+>>>>>>> origin/main
 }
 
 public class GameInventory : MonoBehaviour
@@ -56,6 +60,7 @@ public class GameInventory : MonoBehaviour
     private Dictionary<MaterialType, int> stash = new Dictionary<MaterialType, int>();
     private Dictionary<MaterialType, int> raidBackpack = new Dictionary<MaterialType, int>();
 
+<<<<<<< HEAD
     private Dictionary<MaterialType, int> lastRaidItems = new Dictionary<MaterialType, int>();
 
     public bool IsFiltrationBuilt { get; private set; }
@@ -66,6 +71,24 @@ public class GameInventory : MonoBehaviour
     public int BackpackCapacity = 10;
 
     public event Action OnChanged;
+=======
+    // Currency awal 1.000.000
+    public int Currency { get; private set; } = 1000000;
+
+    // Status Fasilitas Base (SDG 11)
+    public bool IsFiltrationBuilt { get; private set; }
+    public bool IsLampBuilt { get; private set; }
+
+    // Status Equipment dari Flea Market (terbawa ke _Combat)
+    public string EquippedScopeName { get; private set; } = "Iron Sight";
+    public float EquippedScopeMultiplier { get; private set; } = 1.0f;
+
+    public bool HasEquippedHelmet { get; private set; } = false;
+    public float EquippedHelmetSaveChance { get; private set; } = 0.45f;
+
+    public bool HasEquippedBodyArmor { get; private set; } = false;
+    public float EquippedBodyArmorReduction { get; private set; } = 0.40f;
+>>>>>>> origin/main
 
     private void Awake()
     {
@@ -93,7 +116,66 @@ public class GameInventory : MonoBehaviour
         return go.AddComponent<GameInventory>();
     }
 
+<<<<<<< HEAD
  
+=======
+    // --- CURRENCY & FLEA MARKET ---
+    public bool TrySpendMoney(int amount)
+    {
+        if (amount < 0 || Currency < amount) return false;
+        Currency -= amount;
+        return true;
+    }
+
+    public void AddMoney(int amount)
+    {
+        if (amount <= 0) return;
+        Currency += amount;
+    }
+
+    public void AddStashItem(MaterialType type, int amount = 1)
+    {
+        if (amount <= 0) return;
+        stash[type] += amount;
+    }
+
+    public void EquipScope(string scopeName, float multiplier)
+    {
+        EquippedScopeName = scopeName;
+        EquippedScopeMultiplier = Mathf.Max(1.0f, multiplier);
+    }
+
+    public void EquipHelmetGear(float saveChance)
+    {
+        HasEquippedHelmet = true;
+        EquippedHelmetSaveChance = Mathf.Clamp01(saveChance);
+    }
+
+    public void EquipBodyArmorGear(float reduction)
+    {
+        HasEquippedBodyArmor = true;
+        EquippedBodyArmorReduction = Mathf.Clamp(reduction, 0f, 0.9f);
+    }
+
+    // --- CHEAT CODE UNTUK TESTING DI BASE ---
+    public void ActivateBaseMaterialCheat()
+    {
+        foreach (MaterialType type in System.Enum.GetValues(typeof(MaterialType)))
+        {
+            if (stash[type] < 1)
+            {
+                stash[type] = 1;
+            }
+            else
+            {
+                stash[type] += 1;
+            }
+        }
+        Debug.Log("[CHEAT] Granted +1 of all Base Materials (Charcoal, FilterCloth, WaterPipe, Lamp)!");
+    }
+
+    // --- RAID BACKPACK & STASH ---
+>>>>>>> origin/main
     public void AddRaidLoot(MaterialType type, int amount = 1)
     {
         if (amount <= 0) return;
@@ -143,6 +225,7 @@ public class GameInventory : MonoBehaviour
     public int GetStashCount(MaterialType type) => stash[type];
     public int GetBackpackCount(MaterialType type) => raidBackpack[type];
 
+<<<<<<< HEAD
     public int GetLastRaidCount(MaterialType type) => lastRaidItems[type];
         public void ClearRaidSummary()
     {
@@ -194,6 +277,9 @@ public class GameInventory : MonoBehaviour
     }
 
 
+=======
+    // --- CRAFTING: WATER FILTRATION (3 PARTS) ---
+>>>>>>> origin/main
     public bool CanCraftWaterFiltration()
     {
         if (IsFiltrationBuilt) return false;
@@ -211,6 +297,22 @@ public class GameInventory : MonoBehaviour
         stash[MaterialType.WaterPipe] -= 1;
         IsFiltrationBuilt = true;
         OnChanged?.Invoke();
+        return true;
+    }
+
+    // --- CRAFTING: BASE LAMP (1 PART: LAMP) ---
+    public bool CanCraftLamp()
+    {
+        if (IsLampBuilt) return false;
+        return stash[MaterialType.Lamp] >= 1;
+    }
+
+    public bool TryCraftLamp()
+    {
+        if (!CanCraftLamp()) return false;
+
+        stash[MaterialType.Lamp] -= 1;
+        IsLampBuilt = true;
         return true;
     }
 }

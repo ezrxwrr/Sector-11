@@ -60,6 +60,20 @@ public class Health : MonoBehaviour
 
     private void Start()
     {
+        // Terapkan Helmet & Body Armor yang dibeli di Flea Market jika ini adalah Player
+        if (isPlayer)
+        {
+            GameInventory inv = GameInventory.EnsureExists();
+            if (inv.HasEquippedHelmet)
+            {
+                EquipHelmet(true, inv.EquippedHelmetSaveChance);
+            }
+            if (inv.HasEquippedBodyArmor)
+            {
+                EquipBodyArmor(true, inv.EquippedBodyArmorReduction);
+            }
+        }
+
         onHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
@@ -176,13 +190,9 @@ public class Health : MonoBehaviour
     private void ReturnToBaseAfterDeath()
     {
         if (Application.CanStreamedLevelBeLoaded("_Base"))
-        {
             SceneManager.LoadScene("_Base");
-        }
         else
-        {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
     }
 
     private void OnGUI()
@@ -198,8 +208,8 @@ public class Health : MonoBehaviour
                 alignment = TextAnchor.MiddleLeft
             };
 
-            string status = isDead ? "KIA — LOOT LOST" : $"HP: {Mathf.CeilToInt(currentHealth)} / {Mathf.CeilToInt(maxHealth)}";
-            GUI.Box(new Rect(20, 20, 220, 36), "  " + status, hpStyle);
+            string status = isDead ? "KIA (DEAD) - LOST BACKPACK" : $"HP: {Mathf.CeilToInt(currentHealth)} / {Mathf.CeilToInt(maxHealth)}";
+            GUI.Box(new Rect(20, 20, 260, 36), "  " + status, hpStyle);
         }
 
         if (showLastHitHUD && Time.time < globalLastHitExpireTime && !string.IsNullOrEmpty(globalLastHitText))
