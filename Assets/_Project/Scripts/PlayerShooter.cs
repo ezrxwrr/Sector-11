@@ -13,22 +13,15 @@ public class PlayerShooter : MonoBehaviour
     [SerializeField] private LayerMask hitMask = ~0;
 
     [Header("Barebone Hit Chance Weights (%)")]
-    [Tooltip("Peluang peluru meleset total pada senjata barebone.")]
     [SerializeField] private float baseMissWeight = 15f;
-    [Tooltip("Peluang headshot pada senjata barebone (rendah).")]
     [SerializeField] private float baseHeadWeight = 5f;
-    [Tooltip("Peluang kena badan/torso pada senjata barebone (paling tinggi).")]
     [SerializeField] private float baseTorsoWeight = 50f;
-    [Tooltip("Peluang kena tangan (sama dengan kaki).")]
     [SerializeField] private float baseArmsWeight = 15f;
-    [Tooltip("Peluang kena kaki (sama dengan tangan).")]
     [SerializeField] private float baseLegsWeight = 15f;
 
     [Header("Optics / Scope Multiplier")]
-    [Tooltip("1.0 = Barebone/Iron Sight. Naikkan (mis. 1.5 = Red Dot, 2.5 = 4x Scope) untuk memperkecil Miss & menaikkan Head/Torso.")]
     [SerializeField] private float scopeAccuracyMultiplier = 1.0f;
     [SerializeField] private float maxHeadChancePercent = 35f;
-    [Tooltip("Jarak dekat (meter) di mana peluang Miss menjadi 0%.")]
     [SerializeField] private float pointBlankRange = 2.5f;
 
     [Header("Ammo & Reload")]
@@ -47,7 +40,6 @@ public class PlayerShooter : MonoBehaviour
     [SerializeField] private Color tracerColor = new Color(1f, 0.85f, 0.3f, 1f);
 
     [Header("Animation")]
-    [Tooltip("Isi sesuai nama parameter di PlayerAnimator (otomatis mendeteksi Trigger maupun Bool).")]
     [SerializeField] private string shootParameterName = "Shoot";
 
     [Header("Prototype HUD")]
@@ -77,6 +69,16 @@ public class PlayerShooter : MonoBehaviour
         SetupTracerLine();
     }
 
+    private void Start()
+    {
+        // Terapkan scope yang dibeli dari Flea Market di _Base
+        GameInventory inv = GameInventory.EnsureExists();
+        if (inv.EquippedScopeMultiplier > 1.0f)
+        {
+            SetScopeMultiplier(inv.EquippedScopeMultiplier);
+        }
+    }
+
     private void SetupTracerLine()
     {
         if (!showBulletTracer) return;
@@ -102,7 +104,6 @@ public class PlayerShooter : MonoBehaviour
     {
         bool fireHeld = ReadFireHeld();
 
-        // Sinkronisasi otomatis jika parameter di Animator bertipe Bool
         UpdateAnimatorBoolIfUsed(fireHeld && !isReloading && currentAmmo > 0);
 
         if (isReloading) return;
@@ -236,7 +237,7 @@ public class PlayerShooter : MonoBehaviour
     {
         scopeAccuracyMultiplier = Mathf.Max(0.25f, newMultiplier);
     }
-    
+
     public void AddAmmo(int amount)
     {
         if (amount <= 0) return;
