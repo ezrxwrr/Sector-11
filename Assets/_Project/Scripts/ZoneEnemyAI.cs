@@ -31,6 +31,10 @@ public class ZoneEnemyAI : MonoBehaviour
     [SerializeField] private float tracerDuration = 0.045f;
     [SerializeField] private Color tracerColor = new Color(1f, 0.25f, 0.2f, 1f);
 
+    [Header("Alert Allies")]
+    [SerializeField] private float alertAlliesRadius = 20f;
+    [SerializeField] private float alertCooldown = 5f;
+
     private Vector3 homePosition;
     private Vector3 currentDestination;
     private float waitTimer;
@@ -43,6 +47,8 @@ public class ZoneEnemyAI : MonoBehaviour
     private Health playerHealth;
     private Health myHealth;
     private LineRenderer tracerLine;
+    private bool hasAlertedAllies;
+    private float alertCooldownTimer;
 
     private void Awake()
     {
@@ -98,6 +104,11 @@ public class ZoneEnemyAI : MonoBehaviour
             alertTimer -= Time.deltaTime;
         }
 
+        if (alertCooldownTimer > 0f)
+        {
+            alertCooldownTimer -= Time.deltaTime;
+        }
+
         // Evasive reaction when taking damage
         if (myHealth != null && myHealth.CurrentHealth < lastKnownHealth)
         {
@@ -143,6 +154,8 @@ public class ZoneEnemyAI : MonoBehaviour
 
     private void HandlePatrolState()
     {
+        hasAlertedAllies = false;
+
         if (waitTimer > 0f)
         {
             waitTimer -= Time.deltaTime;
@@ -154,6 +167,14 @@ public class ZoneEnemyAI : MonoBehaviour
 
     private void HandleCombatState()
     {
+        // Alert nearby allies when first spotting the player
+        if (!hasAlertedAllies && alertCooldownTimer <= 0f)
+        {
+            AlertNearbyAllies();
+            hasAlertedAllies = true;
+            alertCooldownTimer = alertCooldown;
+        }
+
         Vector3 lookDir = playerTransform.position - transform.position;
         lookDir.y = 0f;
         if (lookDir.sqrMagnitude > 0.001f)
@@ -232,6 +253,32 @@ public class ZoneEnemyAI : MonoBehaviour
         );
     }
 
+    private void AlertNearbyAllies()
+    {
+        ZoneEnemyAI[] allEnemies = FindObjectsByType<ZoneEnemyAI>(FindObjectsSortMode.None);
+        foreach (ZoneEnemyAI ally in allEnemies)
+        {
+            if (ally == this) continue;
+            if (ally.myHealth != null && ally.myHealth.IsDead) continue;
+
+            float dist = Vector3.Distance(transform.position, ally.transform.position);
+            if (dist <= alertAlliesRadius)
+            {
+                ally.ReceiveAlert(playerTransform.position);
+            }
+        }
+    }
+
+    public void ReceiveAlert(Vector3 threatPosition)
+    {
+        if (myHealth != null && myHealth.IsDead) return;
+        if (alertTimer > 0f) return; // Already alert
+
+        alertTimer = 4f;
+        waitTimer = 0f;
+        currentDestination = threatPosition;
+    }
+
     private void ShootAtPlayer()
     {
         if (playerTransform == null) return;
@@ -298,5 +345,7 @@ public class ZoneEnemyAI : MonoBehaviour
         Gizmos.DrawWireSphere(center, zoneRadius);
         Gizmos.color = new Color(1f, 0.2f, 0.2f, 0.5f);
         Gizmos.DrawWireSphere(transform.position, aggroRange);
+        Gizmos.color = new Color(0.2f, 0.6f, 1f, 0.3f);
+        Gizmos.DrawWireSphere(transform.position, alertAlliesRadius);
     }
 }
