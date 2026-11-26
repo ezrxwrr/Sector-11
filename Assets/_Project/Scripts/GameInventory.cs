@@ -144,6 +144,12 @@ public class GameInventory : MonoBehaviour
     public int GetBackpackCount(MaterialType type) => raidBackpack[type];
 
     public int GetLastRaidCount(MaterialType type) => lastRaidItems[type];
+        public void ClearRaidSummary()
+    {
+        foreach (MaterialType type in Enum.GetValues(typeof(MaterialType)))
+            lastRaidItems[type] = 0;
+        LastRaidResult = RaidResult.None;
+    }
 
     public void AddMoney(int amount)
     {
